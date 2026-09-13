@@ -20,13 +20,27 @@ public class AuthController {
         this.authService = authService;
     }
 
+    @PostMapping("/signup")
+    public ResponseEntity<LoginResponse> signup(@Valid @RequestBody SignupRequest request) {
+        Optional<User> user = authService.signup(
+                request.email(), request.password());
+
+        if (user.isEmpty()) {
+            return ResponseEntity.status(409)
+                    .body(new LoginResponse("Email is already registered.", null));
+        }
+
+        return ResponseEntity.status(201)
+                .body(new LoginResponse("Signup successful.", user.get().getId()));
+    }
+
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
-        Optional<User> user = authService.authenticate(request.username(), request.password());
+        Optional<User> user = authService.authenticate(request.email(), request.password());
 
         if (user.isEmpty()) {
             return ResponseEntity.status(401)
-                    .body(new LoginResponse("Invalid username or password.", null));
+                    .body(new LoginResponse("Invalid email or password.", null));
         }
 
         return ResponseEntity.ok(

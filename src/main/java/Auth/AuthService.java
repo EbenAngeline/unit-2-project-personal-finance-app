@@ -18,8 +18,18 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public Optional<User> authenticate(String username, String password) {
-        return userService.getUserByUsername(username)
+    public Optional<User> authenticate(String email, String password) {
+        return userService.getUserByEmail(email)
                 .filter(user -> passwordEncoder.matches(password, user.getPasswordHash()));
+    }
+
+    public Optional<User> signup(String email, String password) {
+        if (userService.getUserByEmail(email).isPresent()) {
+            return Optional.empty();
+        }
+
+        User user = new User(email, passwordEncoder.encode(password));
+        userService.createUser(user);
+        return Optional.of(user);
     }
 }
