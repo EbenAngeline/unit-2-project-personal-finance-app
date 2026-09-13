@@ -46,4 +46,3 @@ public interface UserRepository extends JpaRepository<User, Integer> {
         return true;
     }
 }
-
