@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.persistence.autoconfigure.EntityScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-@SpringBootApplication(scanBasePackages = {"com.example.Unit2ProjectPersonalFinanceApp", "Budget", "Expense", "User", "Models"})
+@SpringBootApplication(scanBasePackages = {"com.example.Unit2ProjectPersonalFinanceApp", "Auth", "Budget", "Expense", "User", "Models"})
 @EntityScan(basePackages = "Models")
 @EnableJpaRepositories(basePackages = {"Expense", "Budget", "User"})
 public class Unit2ProjectPersonalFinanceAppApplication {
