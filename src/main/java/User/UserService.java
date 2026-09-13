@@ -18,8 +18,8 @@ public class UserService {
         userRepository.createUser(user);
     }
 
-    public Optional<User> getUserByUsername(String username) {
-        return userRepository.findByEmail(username);
+    public Optional<User> getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 
     public Optional<User> updateUser(Integer id, User userDetails) {
