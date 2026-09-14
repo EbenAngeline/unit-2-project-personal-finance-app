@@ -1,0 +1,28 @@
+/* Home.jsx */
+.hero-card h3 {
+  color: black;
+  text-align: center;
+}
+
+/* About.jsx — this .image-size (with margin-top) is the one that has always
+   won the cascade for all three marketing pages, since About loaded last */
+.image-size {
+  display: block;
+  margin: 0 auto;
+  padding: 80px;
+  margin-top: -30px;
+  width: 500px;
+  height: auto;
+  margin-bottom: 30px;
+}
+
+/* Contact.jsx */
+/* No .hero-highlights element exists on this page — this rule is here
+   only because CSS is global, and it actually styles Home's list too. */
+.hero-highlights {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+  padding: 0;
+  margin: 0;
+}

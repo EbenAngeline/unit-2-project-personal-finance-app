@@ -1,0 +1,135 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+:root {
+  --ink: #111827;
+  --muted: #6b7280;
+  --surface: #ffffff;
+  --border: #e5e7eb;
+  --divider: #f3f4f6;
+  --success: #047857;
+  --warning: #b45309;
+  --danger: #b91c1c;
+  --radius-sm: 10px;
+  --radius-md: 12px;
+  --radius-pill: 999px;
+}
+
+h1 {
+  text-align: center;
+}
+
+/* Marketing page wrapper (Home, About, Contact) */
+.container {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 2.5rem 1rem 3rem;
+}
+
+.info-card,
+.hero-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.info-card h2,
+.hero-card h2 {
+  text-align: center;
+  margin: 0;
+  font-size: 1.6rem;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.info-card h3,
+.hero-card h3 {
+  font-family: cursive;
+  -webkit-text-fill-color: #0062ff;
+}
+
+.feature-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.feature-list,
+.hero-highlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+/* App page wrapper (Dashboard, Budget, Transactions) */
+.dashboard-page,
+.budget-page,
+.transactions-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 2rem;
+  color: var(--ink);
+}
+
+.page-header h1,
+.dashboard-hero h1,
+.transactions-page h1 {
+  margin: 0;
+  font-size: 1.7rem;
+  font-weight: 600;
+}
+
+.hero-text {
+  margin: 0.3rem 0 0;
+}
+
+.page-subtitle {
+  color: #25539e;
+}
+
+.budget-summary,
+.budget-section,
+.transaction-card,
+.box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+}
+
+/* Uppercase "eyebrow" caption used above stat/summary values */
+.summary-item .label,
+.detail .label,
+.box-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.25rem;
+}
+
+/* Breakpoint 1: tablet/narrow window */
+@media (max-width: 768px) {
+  .feature-list,
+  .hero-highlights {
+    gap: 0.6rem;
+  }
+}
+
+/* Breakpoint 2: phone */
+@media (max-width: 480px) {
+  .feature-list,
+  .hero-highlights {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

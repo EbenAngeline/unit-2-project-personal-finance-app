@@ -1,0 +1,80 @@
+.dashboard-hero {
+  margin-bottom: 1rem;
+}
+.hero-text {
+  color: #25539e;
+  text-align: center;
+}
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.box-label {
+  font-weight: 600;
+}
+.box h2,
+.transaction-card h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.positive {
+  color: var(--success);
+}
+.negative {
+  color: var(--danger);
+}
+.transaction-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+.view-all-link {
+  display: inline-block;
+  padding: 0.45rem 0.8rem;
+  border-radius: var(--radius-pill);
+  background: var(--divider);
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.view-all-link:hover {
+  background: var(--border);
+}
+.type-pill {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.type-pill.income,
+.amount-cell.income {
+  color: var(--success);
+}
+.type-pill.expense,
+.amount-cell.expense {
+  color: var(--danger);
+}
+/* Breakpoint 1: tablet - stack the summary boxes to one column */
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Breakpoint 2: phone - single column, tighter row layout */
+@media (max-width: 480px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  .transaction-card-header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}

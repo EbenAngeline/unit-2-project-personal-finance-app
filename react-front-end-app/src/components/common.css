@@ -1,0 +1,172 @@
+.btn {
+  font-family: inherit;
+  border: none;
+  cursor: pointer;
+}
+
+.btn:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--accent, #4f46e5);
+  outline-offset: 2px;
+}
+
+/* Footer.jsx */
+.footer {
+  padding: 1rem 1.5rem;
+  text-align: center;
+  background-color: #151b23;
+  color: rgb(168, 168, 194);
+  border-top: 1px solid;
+  font-size: 0.9rem;
+  margin-top: 40px;
+  bottom: 40px;
+  width: 100%;
+  height: 30px;
+}
+
+/* PageLoader.jsx */
+.page-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  z-index: 2000;
+  overflow: hidden;
+}
+
+.page-loader-bar {
+  height: 100%;
+  width: 40%;
+  background: var(--accent, #4f46e5);
+  animation: page-loader-slide 0.4s ease-in-out;
+}
+
+@keyframes page-loader-slide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+
+/* Shared modal shell — used by Transactions (add/edit/delete) and Budget (settings/category edit) */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 1000;
+}
+.modal-content {
+  width: min(100%, 620px);
+  max-height: 90vh;
+  overflow: auto;
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Shared radio-pill picker — used by AddTransaction (Expense/Income) and Budget (Monthly/Weekly) */
+.radio-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.radio-button {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+.radio-button.active {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+.radio-button input {
+  margin: 0;
+}
+
+/* Shared form-field styling — used by AddTransaction and Budget's edit forms.
+   Note: .input-with-icon input itself stays defined locally in each of those
+   files, not here — it depends on cascade order relative to each file's own
+   broader input selectors, so centralizing it would flip which rule wins. */
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.field-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.input-with-icon {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.input-with-icon .symbol {
+  padding: 0 0.7rem;
+  color: var(--muted);
+}
+.form-action {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 0.25rem;
+}
+.cancel-button,
+.save-button {
+  padding: 0.6rem 0.9rem;
+  border: none;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  cursor: pointer;
+}
+.cancel-button {
+  background: var(--divider);
+  color: var(--ink);
+}
+.save-button {
+  background: var(--ink);
+  color: #fff;
+}
+
+/* Breakpoint 2: phone - tighter modal padding, full-width form actions */
+@media (max-width: 480px) {
+  .modal-content {
+    padding: 0.75rem;
+  }
+  .form-action {
+    flex-direction: column-reverse;
+  }
+  .cancel-button,
+  .save-button {
+    width: 100%;
+    text-align: center;
+  }
+}

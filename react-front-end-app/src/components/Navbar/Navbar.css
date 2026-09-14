@@ -1,0 +1,111 @@
+:root {
+  --accent: #4f46e5;
+}
+
+.navbar {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.navbar__toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.3rem;
+  border: 0;
+  background: transparent;
+  padding: 0.4rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.navbar__toggle span {
+  width: 1.3rem;
+  height: 2px;
+  background: var(--ink);
+  border-radius: 999px;
+}
+
+/* Animate the three bars into an "X" when the menu is open */
+.navbar__toggle--active span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.navbar__toggle--active span:nth-child(2) {
+  opacity: 0;
+}
+
+.navbar__toggle--active span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+.navbar__list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.navbar__link {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.7rem;
+  border-radius: 0.5rem;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.navbar__link:hover,
+.navbar__link--active {
+  background-color: rgba(79, 70, 229, 0.1);
+  color: var(--accent);
+}
+
+/* Breakpoint 1: tablet - hide the inline sidebar nav behind the
+   hamburger toggle; it opens as a full-width dropdown card. */
+@media (max-width: 768px) {
+  .navbar__toggle {
+    display: flex;
+  }
+
+  .navbar {
+    display: none;
+    width: 100%;
+    order: 3;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: var(--surface, #fff);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md, 12px);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+  }
+
+  .navbar--open {
+    display: flex;
+  }
+
+  .navbar__list {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    gap: 0.4rem;
+    padding-top: 0.25rem;
+  }
+}
+
+/* Breakpoint 2: phone - larger tap targets for the dropdown links */
+@media (max-width: 480px) {
+  .navbar__link {
+    padding: 0.65rem 0.75rem;
+  }
+}
