@@ -1,20 +1,32 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import "./Navbar.css";
 import Button from "../Button/Button";
 
-function NavBar() {
+function NavBar({ isLoggedIn, onLogout }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
-  const links = [
-    { to: "/", label: "Home" },
-    { to: "/about", label: "About" },
+  const links = isLoggedIn
+    ? [
+        { to: "/", label: "Home" },
+        { to: "/dashboard", label: "Dashboard" },
+        { to: "/budget", label: "Budget" },
+        { to: "/transactions", label: "Transactions" },
+      ]
+    : [
+        { to: "/", label: "Home" },
+        { to: "/about", label: "About" },
+        
+        { to: "/login", label: "Login" },
+        { to: "/contact", label: "Contact" },
+      ];
 
-    { to: "/dashboard", label: "Dashboard" },
-    { to: "/budget", label: "Budget" },
-    { to: "/transactions", label: "Transactions" },
-    { to: "/contact", label: "Contact" },
-  ];
+  const handleLogout = () => {
+    if (onLogout) onLogout();
+    setIsMenuOpen(false);
+    navigate("/");
+  };
 
   return (
     <>
@@ -50,9 +62,22 @@ function NavBar() {
               </NavLink>
             </li>
           ))}
+
+          {isLoggedIn && (
+            <li>
+              <button
+                type="button"
+                className="navbar__link navbar__button"
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
+            </li>
+          )}
         </ul>
       </nav>
     </>
   );
 }
+
 export default NavBar;

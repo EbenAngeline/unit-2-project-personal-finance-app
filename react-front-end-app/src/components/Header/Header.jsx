@@ -1,7 +1,7 @@
 import "./Header.css";
 import NavBar from "../Navbar/NavBar";
 
-function Header() {
+function Header({ isLoggedIn, onLogout }) {
   return (
     <div className="nav-header">
       <header className="header">
@@ -9,7 +9,7 @@ function Header() {
           <h1 className="header__title">TRACK YOUR PERSONAL FINANCE APP</h1>
         </div>
 
-        <NavBar />
+        <NavBar isLoggedIn={isLoggedIn} onLogout={onLogout} />
       </header>
     </div>
   );

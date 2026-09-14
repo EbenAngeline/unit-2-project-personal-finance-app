@@ -7,6 +7,7 @@ import PageLoader from "./components/PageLoader/PageLoader";
 import HomePage from "./pages/Home";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import LoginPage from "./pages/Auth/LoginPage";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Budget from "./pages/Budget/Budget";
 import Transactions from "./pages/Transactions/Transactions";
@@ -16,11 +17,15 @@ function App() {
   const [transactions, setTransactions] = usePersistentState("transactions", mockTransactions);
   const [budgetLimits, setBudgetLimits] = usePersistentState("budgetLimits", defaultBudgetLimits);
   const [budgetPeriod, setBudgetPeriod] = usePersistentState("budgetPeriod", "Monthly");
+  const [isLoggedIn, setIsLoggedIn] = usePersistentState("isLoggedIn", false);
+
+  const handleLogin = () => setIsLoggedIn(true);
+  const handleLogout = () => setIsLoggedIn(false);
 
   return (
     <div className="app-shell">
       <PageLoader />
-      <Header />
+      <Header isLoggedIn={isLoggedIn} onLogout={handleLogout} />
 
       <div className="app-content">
         <main className="app-main">
@@ -28,6 +33,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
             <Route
               path="/dashboard"
               // This sends the transaction data to the Dashboard component as a prop.
