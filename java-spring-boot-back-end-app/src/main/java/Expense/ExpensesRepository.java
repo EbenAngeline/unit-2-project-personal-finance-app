@@ -31,6 +31,7 @@ public interface ExpensesRepository extends JpaRepository<Expense, Integer> {
         expense.setCategory(expenseDetails.getCategory());
         expense.setAmount(expenseDetails.getAmount());
         expense.setDate(expenseDetails.getDate());
+        expense.setBudgetId(expenseDetails.getBudgetId());
 
         return Optional.of(save(expense));
     }
