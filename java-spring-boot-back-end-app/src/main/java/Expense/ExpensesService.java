@@ -20,7 +20,7 @@ public class ExpensesService {
         this.budgetRepository = budgetRepository;
     }
 
-    public void createExpense(Expense expense) {
+    public Expense createExpense(Expense expense) {
         if (expense == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Expense payload is required.");
         }
@@ -34,7 +34,7 @@ public class ExpensesService {
                     "Budget ID " + expense.getBudgetId() + " does not exist.");
         }
 
-        expensesRepository.createExpense(expense);
+        return expensesRepository.createExpense(expense);
     }
 
     public List<Expense> getAllExpenses(Integer userId) {

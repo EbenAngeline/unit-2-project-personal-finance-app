@@ -26,10 +26,9 @@ public class ExpensesController {
     }
 
     @PostMapping
-    public ResponseEntity<String> createExpense(@RequestBody Expense expense) {
-        expensesService.createExpense(expense);
-        String message = "Expense created successfully.";
-        return ResponseEntity.status(HttpStatus.CREATED).body(message);
+    public ResponseEntity<Expense> createExpense(@RequestBody Expense expense) {
+        Expense createdExpense = expensesService.createExpense(expense);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdExpense);
     }
 
     @GetMapping

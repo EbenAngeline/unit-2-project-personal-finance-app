@@ -17,8 +17,8 @@ public interface ExpensesRepository extends JpaRepository<Expense, Integer> {
         return findAll();
     }
 
-    default void createExpense(Expense expense) {
-        save(expense);
+    default Expense createExpense(Expense expense) {
+        return save(expense);
     }
 
     default Optional<Expense> updateExpense(Integer id, Expense expenseDetails) {
