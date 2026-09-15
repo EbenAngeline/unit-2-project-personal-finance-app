@@ -24,7 +24,7 @@ public class User {
     private String email;
 
     @NotBlank(message = "Password hash is required")
-    @Column(nullable = false)
+    @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
     protected User() {
