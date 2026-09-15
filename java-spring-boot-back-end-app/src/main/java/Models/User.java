@@ -20,11 +20,11 @@ public class User {
 
     @NotBlank(message = "Email is required")
     @Email(message = "Email must be valid")
-    @Column(nullable = false, unique = true)
+    @Column(name = "email", nullable = false)
     private String email;
 
     @NotBlank(message = "Password hash is required")
-    @Column(name = "password_hash", nullable = false)
+    @Column(name = "passwordHash", nullable = false)
     private String passwordHash;
 
     protected User() {
