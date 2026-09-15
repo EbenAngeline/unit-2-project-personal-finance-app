@@ -13,13 +13,13 @@ function NavBar({ isLoggedIn, onLogout }) {
         { to: "/dashboard", label: "Dashboard" },
         { to: "/budget", label: "Budget" },
         { to: "/transactions", label: "Transactions" },
+        { to: "/contact", label: "Contact" },
       ]
     : [
         { to: "/", label: "Home" },
         { to: "/about", label: "About" },
-        
-        { to: "/login", label: "Login" },
         { to: "/contact", label: "Contact" },
+        { to: "/login", label: "Login" },
       ];
 
   const handleLogout = () => {

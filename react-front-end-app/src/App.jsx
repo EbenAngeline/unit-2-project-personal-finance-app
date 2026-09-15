@@ -8,6 +8,7 @@ import HomePage from "./pages/Home";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import LoginPage from "./pages/Auth/LoginPage";
+import SignUpPage from "./pages/Auth/SignUpPage";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Budget from "./pages/Budget/Budget";
 import Transactions from "./pages/Transactions/Transactions";
@@ -18,9 +19,18 @@ function App() {
   const [budgetLimits, setBudgetLimits] = usePersistentState("budgetLimits", defaultBudgetLimits);
   const [budgetPeriod, setBudgetPeriod] = usePersistentState("budgetPeriod", "Monthly");
   const [isLoggedIn, setIsLoggedIn] = usePersistentState("isLoggedIn", false);
+  const [currentUser, setCurrentUser] = usePersistentState("currentUser", null);
 
-  const handleLogin = () => setIsLoggedIn(true);
-  const handleLogout = () => setIsLoggedIn(false);
+  const handleLogin = (user) => {
+    const nextUser = user ?? { email: "user@example.com" };
+    setCurrentUser(nextUser);
+    setIsLoggedIn(true);
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    setIsLoggedIn(false);
+  };
 
   return (
     <div className="app-shell">
@@ -34,6 +44,7 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
+            <Route path="/signup" element={<SignUpPage />} />
             <Route
               path="/dashboard"
               // This sends the transaction data to the Dashboard component as a prop.
