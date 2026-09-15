@@ -20,7 +20,10 @@ public class Expense {
 
     @Column(name = "userId", nullable = false)
     private Integer userId;
+    private String description;
     private String category;
+    @Column(name = "type")
+    private String type;
     private BigDecimal amount;
     private LocalDateTime date;
     private Integer budgetId;
@@ -48,12 +51,28 @@ public class Expense {
         this.userId = userId;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public String getCategory() {
         return category;
     }
 
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public BigDecimal getAmount() {

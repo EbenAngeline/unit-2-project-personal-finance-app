@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -32,8 +33,8 @@ public class ExpensesController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Expense>> getAllExpenses() {
-        List<Expense> expenses = expensesService.getAllExpenses();
+    public ResponseEntity<List<Expense>> getAllExpenses(@RequestParam Integer userId) {
+        List<Expense> expenses = expensesService.getAllExpenses(userId);
         return ResponseEntity.ok(expenses);
     }
 

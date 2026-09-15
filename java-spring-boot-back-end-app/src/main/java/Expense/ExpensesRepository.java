@@ -11,6 +11,8 @@ import java.util.Optional;
 @Repository
 public interface ExpensesRepository extends JpaRepository<Expense, Integer> {
 
+    List<Expense> findAllByUserId(Integer userId);
+
     default List<Expense> findAllExpenses() {
         return findAll();
     }
@@ -28,7 +30,9 @@ public interface ExpensesRepository extends JpaRepository<Expense, Integer> {
 
         Expense expense = existingExpense.get();
         expense.setUserId(expenseDetails.getUserId());
+        expense.setDescription(expenseDetails.getDescription());
         expense.setCategory(expenseDetails.getCategory());
+        expense.setType(expenseDetails.getType());
         expense.setAmount(expenseDetails.getAmount());
         expense.setDate(expenseDetails.getDate());
         expense.setBudgetId(expenseDetails.getBudgetId());

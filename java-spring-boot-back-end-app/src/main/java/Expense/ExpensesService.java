@@ -37,8 +37,12 @@ public class ExpensesService {
         expensesRepository.createExpense(expense);
     }
 
-    public List<Expense> getAllExpenses() {
-        return expensesRepository.findAllExpenses();
+    public List<Expense> getAllExpenses(Integer userId) {
+        if (userId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is required.");
+        }
+
+        return expensesRepository.findAllByUserId(userId);
     }
 
     public Optional<Expense> updateExpense(Integer id, Expense expenseDetails) {
