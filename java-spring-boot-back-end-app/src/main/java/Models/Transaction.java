@@ -1,18 +1,18 @@
 package Models;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.Column;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "expense")
-public class Expense {
+@Table(name = "transaction")
+public class Transaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,10 +28,10 @@ public class Expense {
     private LocalDateTime date;
     private Integer budgetId;
 
-    protected Expense() {
+    protected Transaction() {
     }
 
-    public Expense(Integer userId, String category, BigDecimal amount, LocalDateTime date, Integer budgetId) {
+    public Transaction(Integer userId, String category, BigDecimal amount, LocalDateTime date, Integer budgetId) {
         this.userId = userId;
         this.category = category;
         this.amount = amount;
