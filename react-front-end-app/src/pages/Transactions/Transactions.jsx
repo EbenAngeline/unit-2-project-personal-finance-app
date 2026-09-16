@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import "./Transaction.css";
 import Table from "../../components/Table/Table";
@@ -11,12 +11,11 @@ function buildColumns(onEdit, onDelete) {
     { key: "date", label: "Date" },
     { key: "description", label: "Description" },
     { key: "category", label: "Category" },
-    { key: "type", label: "Type" },
     {
       key: "amount",
       label: "Amount",
       cellClassName: (transaction) =>
-        transaction.type === "Income" ? "income-amount" : "expense-amount",
+        transaction.amount >= 0 ? "income-amount" : "expense-amount",
       render: (transaction) => transaction.amount.toFixed(2),
     },
     {
@@ -44,7 +43,7 @@ function buildColumns(onEdit, onDelete) {
   ];
 }
 
-function Transactions({ transactions, setTransactions }) {
+function Transactions({ transactions, setTransactions, currentUser }) {
   const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -53,8 +52,51 @@ function Transactions({ transactions, setTransactions }) {
   const [selectedCategory, setSelectedCategory] = useState(
     () => searchParams.get("category") || "All categories", //Lets Budget deep-link straight to a filtered view.
   );
-  const [selectedType, setSelectedType] = useState("All Types");
   const [sortBy, setSortBy] = useState("Date");
+
+  useEffect(() => {
+    if (!currentUser?.userId) {
+      setTransactions([]);
+      return;
+    }
+
+    let isCancelled = false;
+
+    const getTransactionsForUser = async () => {
+      try {
+        const response = await fetch(
+          `/api/transactions?userId=${currentUser.userId}`,
+        );
+
+        if (!response.ok) {
+          throw new Error("Unable to load transactions.");
+        }
+
+        const transactionsFromDb = await response.json();
+        if (isCancelled) return;
+
+        setTransactions(
+          transactionsFromDb.map((transaction) => ({
+            ...transaction,
+            date: transaction.date?.slice(0, 10) ?? "",
+            description: transaction.description ?? "N/A",
+            amount: Number(transaction.amount),
+          })),
+        );
+      } catch (error) {
+        if (!isCancelled) {
+          console.error(error);
+          setTransactions([]);
+        }
+      }
+    };
+
+    getTransactionsForUser();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [currentUser?.userId, setTransactions]);
 
   const categoryFromLink = searchParams.get("category");
   const categories = [
@@ -95,9 +137,7 @@ function Transactions({ transactions, setTransactions }) {
     const matchesCategory =
       selectedCategory === "All categories" ||
       transaction.category === selectedCategory;
-    const matchesType =
-      selectedType === "All Types" || transaction.type === selectedType;
-    return matchesSearch && matchesCategory && matchesType;
+    return matchesSearch && matchesCategory;
   });
 
   const sortedTransactions = [...filteredTransactions].sort((a, b) => {
@@ -138,15 +178,6 @@ function Transactions({ transactions, setTransactions }) {
           ))}
         </select>
 
-        <select
-          value={selectedType}
-          onChange={(e) => setSelectedType(e.target.value)}
-        >
-          <option value="All Types">All Types</option>
-          <option value="Income">Income</option>
-          <option value="Expense">Expense</option>
-        </select>
-
         <div className="sort">
           <label>Sort</label>
           <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
@@ -171,6 +202,7 @@ function Transactions({ transactions, setTransactions }) {
           <AddTransaction
             transactions={transactions}
             setTransactions={setTransactions}
+            currentUser={currentUser}
             onClose={handleCloseModal}
             editingTransaction={editingTransaction} //null → create a new transaction.
           />
