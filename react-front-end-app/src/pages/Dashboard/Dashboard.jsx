@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "./Dashboard.css";
 import Table from "../../components/Table/Table";
@@ -14,30 +15,71 @@ const activityColumns = [
     render: (transaction) => renderPill(transaction.category),  //the current row of object is passed in to the function(uses custom render fn)
   },
   {
-    key: "type",
-    label: "Type",
-    render: (transaction) => renderPill(transaction.type),
-  },
-  {
     key: "amount",
     label: "Amount",
     cellClassName: (transaction) =>
-      `amount-cell ${transaction.type === "Income" ? "income" : "expense"}`,
+      `amount-cell ${transaction.amount >= 0 ? "income" : "expense"}`,
     render: (transaction) => `$${Math.abs(transaction.amount).toFixed(2)}`,
   },
 ];
 
-function Dashboard({ transactions }) {
+function Dashboard({ currentUser }) {
+  const [transactions, setTransactions] = useState([]);
+
+  useEffect(() => {
+    if (!currentUser?.userId) {
+      setTransactions([]);
+      return;
+    }
+
+    let isCancelled = false;
+
+    const getTransactionsForUser = async () => {
+      try {
+        const response = await fetch(
+          `/api/transactions?userId=${currentUser.userId}`,
+        );
+
+        if (!response.ok) {
+          throw new Error("Unable to load transactions.");
+        }
+
+        const transactionsFromDb = await response.json();
+        if (isCancelled) return;
+
+        setTransactions(
+          transactionsFromDb.map((transaction) => ({
+            ...transaction,
+            date: transaction.date?.slice(0, 10) ?? "",
+            description: transaction.description ?? "N/A",
+            amount: Number(transaction.amount),
+          })),
+        );
+      } catch (error) {
+        if (!isCancelled) {
+          console.error(error);
+          setTransactions([]);
+        }
+      }
+    };
+
+    getTransactionsForUser();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [currentUser?.userId]);
+
   const totalIncome = transactions    //keeps only income
-    .filter((item) => item.type === "Income")
+    .filter((item) => item.amount >= 0)
     .reduce((sum, item) => sum + item.amount, 0);
   const totalExpenses = transactions
-    .filter((item) => item.type === "Expense")
+    .filter((item) => item.amount < 0)
     .reduce((sum, item) => sum + Math.abs(item.amount), 0);
   const currentBalance = totalIncome - totalExpenses;
   const recentTransactions = [...transactions]      //create a copy of the array.it changes the orginal array
     .sort((a, b) => new Date(b.date) - new Date(a.date))   //Converts dates into Date objects.Newest comes first
-    .slice(0, 5);  //Keeps only the first five.
+    .slice(0, 3);  //Keeps only the three latest transactions.
 
   return (
     <div className="dashboard-page">
