@@ -22,8 +22,6 @@ public class Transaction {
     private Integer userId;
     private String description;
     private String category;
-    @Column(name = "type")
-    private String type;
     private BigDecimal amount;
     private LocalDateTime date;
     private Integer budgetId;
@@ -65,14 +63,6 @@ public class Transaction {
 
     public void setCategory(String category) {
         this.category = category;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     public BigDecimal getAmount() {

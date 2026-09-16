@@ -27,7 +27,6 @@ public interface TransactionsRepository extends JpaRepository<Transaction, Integ
         transaction.setUserId(transactionDetails.getUserId());
         transaction.setDescription(transactionDetails.getDescription());
         transaction.setCategory(transactionDetails.getCategory());
-        transaction.setType(transactionDetails.getType());
         transaction.setAmount(transactionDetails.getAmount());
         transaction.setDate(transactionDetails.getDate());
         transaction.setBudgetId(transactionDetails.getBudgetId());
