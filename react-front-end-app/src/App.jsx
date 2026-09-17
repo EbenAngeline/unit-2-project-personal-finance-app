@@ -1,6 +1,6 @@
+import { useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import "./App.css";
-import usePersistentState from "./usePersistentState";
 import Header from "./components/Header/Header";
 import Footer from "./components/Footer/Footer";
 import PageLoader from "./components/PageLoader/PageLoader";
@@ -12,17 +12,13 @@ import SignUpPage from "./pages/Auth/SignUpPage";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Budget from "./pages/Budget/Budget";
 import Transactions from "./pages/Transactions/Transactions";
-import { defaultBudgetLimits } from "./Database/MockData";
 
 function App() {
-  const [transactions, setTransactions] = usePersistentState("transactions", []);
-  const [budgetLimits, setBudgetLimits] = usePersistentState(
-    "budgetLimits",
-    { ...defaultBudgetLimits },
-  );
-  const [budgetPeriod, setBudgetPeriod] = usePersistentState("budgetPeriod", "Monthly");
-  const [isLoggedIn, setIsLoggedIn] = usePersistentState("isLoggedIn", false);
-  const [currentUser, setCurrentUser] = usePersistentState("currentUser", null);
+  const [transactions, setTransactions] = useState([]);
+  const [budgetLimits, setBudgetLimits] = useState({});
+  const [budgetPeriod, setBudgetPeriod] = useState("Monthly");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
   const handleLogin = (user) => {
     const nextUser = user ?? { email: "user@example.com" };
