@@ -1,11 +1,16 @@
 package Auth;
 
+import Budget.BudgetService;
+import Models.Budget;
 import Models.User;
 import User.UserService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -13,10 +18,12 @@ import java.util.Optional;
 public class AuthService {
 
     private final UserService userService;
+    private final BudgetService budgetService;
     private final PasswordEncoder passwordEncoder;
 
-    public AuthService(UserService userService, PasswordEncoder passwordEncoder) {
+    public AuthService(UserService userService, BudgetService budgetService, PasswordEncoder passwordEncoder) {
         this.userService = userService;
+        this.budgetService = budgetService;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -37,7 +44,29 @@ public class AuthService {
 
         try {
             userService.createUser(user);
-            return Optional.of(user);
+
+            User savedUser = userService.getUserByEmail(normalisedEmail)
+                    .orElse(null);
+
+            if (savedUser == null || savedUser.getId() == null) {
+                return Optional.empty();
+            }
+
+            List<String> defaultBudgetNames = List.of(
+                    "Groceries",
+                    "Rent",
+                    "Entertainment",
+                    "Utilities",
+                    "Transportation"
+            );
+
+            LocalDateTime now = LocalDateTime.now();
+            for (String budgetName : defaultBudgetNames) {
+                Budget budget = new Budget(savedUser.getId(), budgetName, BigDecimal.valueOf(100), now);
+                budgetService.createBudget(budget);
+            }
+
+            return Optional.of(savedUser);
         } catch (DataIntegrityViolationException ex) {
             return Optional.empty();
         }
