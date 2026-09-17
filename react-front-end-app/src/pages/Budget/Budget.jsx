@@ -212,9 +212,40 @@ const BudgetManagement = ({
     setIsSettingsModalOpen(false);
   };
 
-  const handleSaveCategoryLimit = (nextLimit) => {
-    setBudgetLimits({ ...budgetLimits, [editingCategory]: nextLimit });
-    setEditingCategory(null);
+  const handleSaveCategoryLimit = async (nextLimit) => {
+    if (!currentUser?.userId || !editingCategory) {
+      setEditingCategory(null);
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/budget?userId=${currentUser.userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          category: editingCategory,
+          amount: Number(nextLimit),
+        }),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(payload?.message || "Unable to update budget limit.");
+      }
+
+      const nextBudgetLimits = normalizeBudgetLimits(payload);
+      setBudgetLimits(
+        Object.keys(nextBudgetLimits).length > 0
+          ? nextBudgetLimits
+          : { ...budgetLimits, [editingCategory]: Number(nextLimit) },
+      );
+    } catch (error) {
+      console.error(error);
+      setBudgetLimits({ ...budgetLimits, [editingCategory]: Number(nextLimit) });
+    } finally {
+      setEditingCategory(null);
+    }
   };
 
   return (
