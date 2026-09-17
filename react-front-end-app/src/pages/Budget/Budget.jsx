@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Budget.css";
 import Button from "../../components/Button/Button";
@@ -94,21 +94,97 @@ const BudgetCategory = ({
   );
 };
 
+const normalizeBudgetLimits = (payload) => {
+  if (!payload || typeof payload !== "object") return {};
+
+  if (Array.isArray(payload)) {
+    return payload.reduce((acc, item) => {
+      const name = item?.name ?? item?.category ?? item?.categoryName;
+      const limit = Number(item?.limit ?? item?.amount ?? item?.budget ?? 0);
+
+      if (name) {
+        acc[name] = Number.isFinite(limit) ? limit : 0;
+      }
+
+      return acc;
+    }, {});
+  }
+
+  const directBudget = payload.budgetLimits ?? payload.budget ?? payload.data ?? payload;
+
+  if (directBudget && typeof directBudget === "object") {
+    return Object.entries(directBudget).reduce((acc, [key, value]) => {
+      if (typeof value === "object" && value !== null) {
+        const name = value.name ?? value.category ?? value.categoryName ?? key;
+        const limit = Number(value.limit ?? value.amount ?? value.budget ?? value.value ?? 0);
+
+        if (name) {
+          acc[name] = Number.isFinite(limit) ? limit : 0;
+        }
+      } else if (key) {
+        const limit = Number(value ?? 0);
+        acc[key] = Number.isFinite(limit) ? limit : 0;
+      }
+
+      return acc;
+    }, {});
+  }
+
+  return {};
+};
+
 const BudgetManagement = ({
   transactions,
   budgetLimits,
   setBudgetLimits,
   budgetPeriod,
   setBudgetPeriod,
+  currentUser,
 }) => {
   const navigate = useNavigate();
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
 
+  useEffect(() => {
+    if (!currentUser?.userId) {
+      setBudgetLimits({});
+      return;
+    }
+
+    let isCancelled = false;
+
+    const getBudget = async () => {
+      try {
+        const response = await fetch(`/api/budget?userId=${currentUser.userId}`);
+
+        if (!response.ok) {
+          throw new Error("Unable to load budget.");
+        }
+
+        const payload = await response.json().catch(() => ({}));
+        if (isCancelled) return;
+
+        const nextBudgetLimits = normalizeBudgetLimits(payload);
+        setBudgetLimits(nextBudgetLimits);
+      } catch (error) {
+        console.error(error);
+        if (!isCancelled) {
+          setBudgetLimits({});
+        }
+      }
+    };
+
+    getBudget();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [currentUser?.userId, setBudgetLimits]);
+
   const budgetCategories = Object.entries(budgetLimits).map(([name, limit]) => {
     const expenses = transactions.filter(
       (transaction) =>
-        transaction.category === name && transaction.type === "Expense",
+        transaction.category === name && transaction.amount < 0,
     );
     const spent = expenses.reduce(
       (total, transaction) => total + Math.abs(transaction.amount),

@@ -12,22 +12,29 @@ import SignUpPage from "./pages/Auth/SignUpPage";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Budget from "./pages/Budget/Budget";
 import Transactions from "./pages/Transactions/Transactions";
-import mockTransactions, { budgetLimits as defaultBudgetLimits } from "./Database/MockData";
+import { defaultBudgetLimits } from "./Database/MockData";
 
 function App() {
-  const [transactions, setTransactions] = usePersistentState("transactions", mockTransactions);
-  const [budgetLimits, setBudgetLimits] = usePersistentState("budgetLimits", defaultBudgetLimits);
+  const [transactions, setTransactions] = usePersistentState("transactions", []);
+  const [budgetLimits, setBudgetLimits] = usePersistentState(
+    "budgetLimits",
+    { ...defaultBudgetLimits },
+  );
   const [budgetPeriod, setBudgetPeriod] = usePersistentState("budgetPeriod", "Monthly");
   const [isLoggedIn, setIsLoggedIn] = usePersistentState("isLoggedIn", false);
   const [currentUser, setCurrentUser] = usePersistentState("currentUser", null);
 
   const handleLogin = (user) => {
     const nextUser = user ?? { email: "user@example.com" };
+    setBudgetLimits({});
+    setBudgetPeriod("Monthly");
     setCurrentUser(nextUser);
     setIsLoggedIn(true);
   };
 
   const handleLogout = () => {
+    setBudgetLimits({});
+    setBudgetPeriod("Monthly");
     setCurrentUser(null);
     setIsLoggedIn(false);
   };
@@ -47,8 +54,7 @@ function App() {
             <Route path="/signup" element={<SignUpPage />} />
             <Route
               path="/dashboard"
-              // This sends the transaction data to the Dashboard component as a prop.
-              element={<Dashboard transactions={transactions} />}
+              element={<Dashboard currentUser={currentUser} />}
             />
             <Route
               path="/budget"
@@ -59,6 +65,7 @@ function App() {
                   setBudgetLimits={setBudgetLimits}
                   budgetPeriod={budgetPeriod}
                   setBudgetPeriod={setBudgetPeriod}
+                  currentUser={currentUser}
                 />
               }
             />
@@ -68,6 +75,7 @@ function App() {
                 <Transactions
                   transactions={transactions}  //Current list.
                   setTransactions={setTransactions}  //Saves the updated data to sessionStorage.
+                  currentUser={currentUser}
                 />
               }
             />
