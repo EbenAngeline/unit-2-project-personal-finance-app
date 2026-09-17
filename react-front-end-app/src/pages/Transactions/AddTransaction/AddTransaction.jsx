@@ -13,12 +13,17 @@ const incomeCategories = ["Salary", "Investment"];
 function AddTransaction({
   transactions = [],       //Current list of transactions.
   setTransactions,       //Function used to update the transaction list.
+  currentUser,
   onClose,                   //Function that closes the popup or modal.
   editingTransaction = null,   //If adding a new one: If editing an existing transaction, this contains its data.
 }) {
   const isEditing = Boolean(editingTransaction);
   const [transactionType, setTransactionType] = useState(
-    editingTransaction?.type ?? "Expense",  // ?-If editingTransaction exists, read its type.??Use the value on the left unless it is null or undefined.  
+    editingTransaction
+      ? editingTransaction.amount < 0
+        ? "Expense"
+        : "Income"
+      : "Expense",
   );
   const [amount, setAmount] = useState(
     editingTransaction ? String(Math.abs(editingTransaction.amount)) : "",  //Expenses are stored as negative numbers.
@@ -28,10 +33,12 @@ function AddTransaction({
     editingTransaction?.description ?? "",
   );
   const [date, setDate] = useState(editingTransaction?.date ?? ""); //stores date
+  const [submitError, setSubmitError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const todayISO = getTodayISO();  //Calls the helper function.
   const categoryOptions =
     transactionType === "Expense" ? expenseCategories : incomeCategories;
-  const handleSubmit = (event) =>{     
+  const handleSubmit = async (event) => {
     event.preventDefault();             //Normally forms refresh the page.This stops that behavior.
 
     const numericAmount = Math.abs(Number(amount)); //Number() converts it into
@@ -41,7 +48,6 @@ function AddTransaction({
       date,
       description,
       category,
-      type: transactionType,
       amount: signedAmount,
     };
 
@@ -52,11 +58,45 @@ function AddTransaction({
       });
       setTransactions(updated);  //Updates the state.
     } else {
-      const nextId = transactions.length
-        ? Math.max(...transactions.map((t) => t.id)) + 1
-        : 1;                //If no transactions exist, Start with id 1
+      if (!currentUser?.userId) {
+        setSubmitError("You must be logged in to add a transaction.");
+        return;
+      }
 
-      setTransactions([{ id: nextId, ...details }, ...transactions]);  //The new transaction appears at the top of the list.
+      try {
+        setIsSubmitting(true);
+        setSubmitError("");
+
+        const response = await fetch("/api/transactions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...details,
+            userId: currentUser.userId,
+            date: `${date}T00:00:00`,
+          }),
+        });
+        const createdExpense = await response.json().catch(() => null);
+
+        if (!response.ok) {
+          throw new Error(createdExpense?.message || "Unable to save transaction.");
+        }
+
+        setTransactions([
+          {
+            ...createdExpense,
+            date: createdExpense.date?.slice(0, 10) ?? date,
+            description: createdExpense.description ?? "N/A",
+            amount: Number(createdExpense.amount),
+          },
+          ...transactions,
+        ]);
+      } catch (error) {
+        setSubmitError(error.message || "Unable to save transaction.");
+        return;
+      } finally {
+        setIsSubmitting(false);
+      }
     }
 
     onClose();    //Close the Form
@@ -70,6 +110,7 @@ function AddTransaction({
             ? "Update the details for this transaction"
             : "Enter the details below to log a new transaction"}
         </p>
+        {submitError && <p className="auth-error">{submitError}</p>}
 
         <form className="transaction-form" onSubmit={handleSubmit}>
           <label className="field-label">Transaction Type</label>
@@ -180,8 +221,8 @@ function AddTransaction({
             >
               Cancel
             </Button>
-            <Button type="submit" className="save-button">
-              {isEditing ? "Save Changes" : "Save"}
+            <Button type="submit" className="save-button" disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : isEditing ? "Save Changes" : "Save"}
             </Button>
           </div>
         </form>
