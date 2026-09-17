@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./AddTransaction.css";
 import Button from "../../../components/Button/Button";
 
@@ -19,34 +19,43 @@ function AddTransaction({
 }) {
   const isEditing = Boolean(editingTransaction);
   const userId = currentUser?.userId ?? currentUser?.id ?? currentUser?.user?.id ?? null;
-  const [transactionType, setTransactionType] = useState(
-    editingTransaction
-      ? editingTransaction.amount < 0
-        ? "Expense"
-        : "Income"
-      : "Expense",
-  );
-  const [amount, setAmount] = useState(
-    editingTransaction ? String(Math.abs(editingTransaction.amount)) : "",  //Expenses are stored as negative numbers.
-  );
-  const [category, setCategory] = useState(editingTransaction?.category ?? "");//stores category
-  const [description, setDescription] = useState(                   //stores description
-    editingTransaction?.description ?? "",
-  );
-  const [date, setDate] = useState(editingTransaction?.date ?? ""); //stores date
+  const todayISO = getTodayISO();
+  const [transactionType, setTransactionType] = useState("Expense");
+  const [amount, setAmount] = useState("");
+  const [category, setCategory] = useState("");
+  const [description, setDescription] = useState("");
+  const [date, setDate] = useState(todayISO);
   const [submitError, setSubmitError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const todayISO = getTodayISO();  //Calls the helper function.
+
+  useEffect(() => {
+    if (!editingTransaction) {
+      setTransactionType("Expense");
+      setAmount("");
+      setCategory("");
+      setDescription("");
+      setDate(todayISO);
+      return;
+    }
+
+    setTransactionType(editingTransaction.amount < 0 ? "Expense" : "Income");
+    setAmount(String(Math.abs(editingTransaction.amount)));
+    setCategory(editingTransaction.category ?? "");
+    setDescription(editingTransaction.description ?? "");
+    setDate(editingTransaction.date ? editingTransaction.date.slice(0, 10) : todayISO);
+  }, [editingTransaction, todayISO]);
+
   const categoryOptions =
     transactionType === "Expense" ? expenseCategories : incomeCategories;
   const handleSubmit = async (event) => {
     event.preventDefault();             //Normally forms refresh the page.This stops that behavior.
 
+    const safeDate = date || todayISO;
     const numericAmount = Math.abs(Number(amount)); //Number() converts it into
     const signedAmount =
       transactionType === "Expense" ? -numericAmount : numericAmount;
     const details = {
-      date,
+      date: safeDate,
       description,
       category,
       amount: signedAmount,
@@ -68,7 +77,7 @@ function AddTransaction({
           body: JSON.stringify({
             ...details,
             userId: userId,
-            date: `${date}T00:00:00`,
+            date: `${safeDate}T00:00:00`,
           }),
         });
 
@@ -79,10 +88,10 @@ function AddTransaction({
         }
 
         const normalizedTransaction = {
-          ...updatedTransaction,
-          date: updatedTransaction.date?.slice(0, 10) ?? date,
-          description: updatedTransaction.description ?? "N/A",
-          amount: Number(updatedTransaction.amount),
+          ...(updatedTransaction || {}),
+          date: updatedTransaction?.date ? updatedTransaction.date.slice(0, 10) : safeDate,
+          description: updatedTransaction?.description ?? description ?? "N/A",
+          amount: Number(updatedTransaction?.amount ?? signedAmount),
         };
 
         setTransactions(
@@ -114,7 +123,7 @@ function AddTransaction({
           body: JSON.stringify({
             ...details,
             userId: userId,
-            date: `${date}T00:00:00`,
+            date: `${safeDate}T00:00:00`,
           }),
         });
         const createdExpense = await response.json().catch(() => null);
@@ -125,10 +134,10 @@ function AddTransaction({
 
         setTransactions([
           {
-            ...createdExpense,
-            date: createdExpense.date?.slice(0, 10) ?? date,
-            description: createdExpense.description ?? "N/A",
-            amount: Number(createdExpense.amount),
+            ...(createdExpense || {}),
+            date: createdExpense?.date ? createdExpense.date.slice(0, 10) : safeDate,
+            description: createdExpense?.description ?? description ?? "N/A",
+            amount: Number(createdExpense?.amount ?? signedAmount),
           },
           ...transactions,
         ]);
