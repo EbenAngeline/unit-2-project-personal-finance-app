@@ -121,9 +121,30 @@ function Transactions({ transactions, setTransactions, currentUser }) {
   const handleCancelDelete = () => {
     setDeletingTransaction(null);
   };
-  const handleConfirmDelete = () => {
-    setTransactions(transactions.filter((t) => t.id !== deletingTransaction.id));
-    setDeletingTransaction(null);
+  const handleConfirmDelete = async () => {
+    if (!deletingTransaction?.id) {
+      setDeletingTransaction(null);
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/transactions/${deletingTransaction.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const message = await response.text().catch(() => "Unable to delete transaction.");
+        throw new Error(message || "Unable to delete transaction.");
+      }
+
+      setTransactions(
+        transactions.filter((t) => t.id !== deletingTransaction.id),
+      );
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setDeletingTransaction(null);
+    }
   };
   const handleCloseModal = () => {
     setIsModalOpen(false);
