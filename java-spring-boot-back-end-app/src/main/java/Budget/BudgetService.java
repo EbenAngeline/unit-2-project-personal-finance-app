@@ -23,8 +23,8 @@ public class BudgetService {
         return budgetRepository.findBudgetsByUserId(userId);
     }
 
-    public Optional<Budget> updateBudget(Integer id, Budget budgetDetails) {
-        return budgetRepository.updateBudget(id, budgetDetails);
+    public Optional<Budget> updateBudget(Integer id, Integer userId, Budget budgetDetails) {
+        return budgetRepository.updateBudget(id, userId, budgetDetails);
     }
 
     public boolean deleteBudget(Integer id) {

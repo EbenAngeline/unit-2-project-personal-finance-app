@@ -30,18 +30,22 @@ public class BudgetController {
         return ResponseEntity.ok(budgets);
     }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<String> updateBudget(
-            @PathVariable Integer id,
+    @PatchMapping("/user/{userId}/budget/{budgetId}")
+    public ResponseEntity<String> updateBudgetByUserAndBudget(
+            @PathVariable Integer userId,
+            @PathVariable Integer budgetId,
             @RequestBody Budget budgetDetails) {
-        boolean updated = budgetService.updateBudget(id, budgetDetails).isPresent();
+        if (budgetDetails == null || budgetDetails.getAmount() == null) {
+            return ResponseEntity.badRequest().body("Amount is required.");
+        }
+
+        boolean updated = budgetService.updateBudget(budgetId, userId, budgetDetails).isPresent();
 
         if (!updated) {
             return ResponseEntity.notFound().build();
         }
 
-        String message = "Budget updated successfully.";
-        return ResponseEntity.ok(message);
+        return ResponseEntity.ok("Budget updated successfully.");
     }
 
     @DeleteMapping("/{id}")

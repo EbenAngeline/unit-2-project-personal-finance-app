@@ -20,7 +20,7 @@ public interface BudgetRepository extends JpaRepository<Budget, Integer> {
         save(budget);
     }
 
-    default Optional<Budget> updateBudget(Integer id, Budget budgetDetails) {
+    default Optional<Budget> updateBudget(Integer id, Integer userId, Budget budgetDetails) {
         Optional<Budget> existingBudget = findById(id);
 
         if (existingBudget.isEmpty()) {
@@ -28,10 +28,13 @@ public interface BudgetRepository extends JpaRepository<Budget, Integer> {
         }
 
         Budget budget = existingBudget.get();
-        budget.setUserId(budgetDetails.getUserId());
-        budget.setCategory(budgetDetails.getCategory());
-        budget.setAmount(budgetDetails.getAmount());
-        budget.setDate(budgetDetails.getDate());
+        if (!java.util.Objects.equals(budget.getUserId(), userId)) {
+            return Optional.empty();
+        }
+
+        if (budgetDetails.getAmount() != null) {
+            budget.setAmount(budgetDetails.getAmount());
+        }
 
         return Optional.of(save(budget));
     }
