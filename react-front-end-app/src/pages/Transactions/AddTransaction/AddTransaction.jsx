@@ -51,13 +51,15 @@ function AddTransaction({
     event.preventDefault();             //Normally forms refresh the page.This stops that behavior.
 
     const safeDate = date || todayISO;
+    const normalizedCategory = (category ?? "").trim();
+    const normalizedDescription = (description ?? "").trim();
     const numericAmount = Math.abs(Number(amount)); //Number() converts it into
     const signedAmount =
       transactionType === "Expense" ? -numericAmount : numericAmount;
     const details = {
       date: safeDate,
-      description,
-      category,
+      description: normalizedDescription,
+      category: normalizedCategory,
       amount: signedAmount,
     };
 
@@ -89,8 +91,9 @@ function AddTransaction({
 
         const normalizedTransaction = {
           ...(updatedTransaction || {}),
+          category: updatedTransaction?.category ?? normalizedCategory ?? editingTransaction?.category ?? "",
+          description: updatedTransaction?.description ?? normalizedDescription ?? editingTransaction?.description ?? "N/A",
           date: updatedTransaction?.date ? updatedTransaction.date.slice(0, 10) : safeDate,
-          description: updatedTransaction?.description ?? description ?? "N/A",
           amount: Number(updatedTransaction?.amount ?? signedAmount),
         };
 

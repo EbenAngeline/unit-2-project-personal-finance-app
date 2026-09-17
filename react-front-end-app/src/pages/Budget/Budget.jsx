@@ -235,9 +235,7 @@ const BudgetManagement = ({
   }, [userId]);
 
   useEffect(() => {
-    if (transactions && transactions.length > 0) {
-      setBudgetTransactions(transactions);
-    }
+    setBudgetTransactions(Array.isArray(transactions) ? transactions : []);
   }, [transactions]);
 
   useEffect(() => {
