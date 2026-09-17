@@ -4,7 +4,7 @@ import Budget.BudgetService;
 import Models.Budget;
 import Models.User;
 import User.UserService;
-import org.springframework.dao.DataIntegrityViolationException;
+import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +17,15 @@ import java.util.Optional;
 @Service
 public class AuthService {
 
+    private static final List<String> DEFAULT_BUDGET_NAMES = List.of(
+            "Groceries",
+            "Rent",
+            "Entertainment",
+            "Utilities",
+            "Transportation"
+    );
+    private static final BigDecimal DEFAULT_BUDGET_AMOUNT = BigDecimal.valueOf(100);
+
     private final UserService userService;
     private final BudgetService budgetService;
     private final PasswordEncoder passwordEncoder;
@@ -28,47 +37,31 @@ public class AuthService {
     }
 
     public Optional<User> authenticate(String email, String password) {
-        String normalisedEmail = normalizeEmail(email);
-        return userService.getUserByEmail(normalisedEmail)
+        String normalizedEmail = normalizeEmail(email);
+        return userService.getUserByEmail(normalizedEmail)
                 .filter(user -> passwordEncoder.matches(password, user.getPasswordHash()));
     }
 
+    @Transactional
     public Optional<User> signup(String email, String password) {
-        String normalisedEmail = normalizeEmail(email);
+        String normalizedEmail = normalizeEmail(email);
 
-        if (userService.getUserByEmail(normalisedEmail).isPresent()) {
+        if (userService.getUserByEmail(normalizedEmail).isPresent()) {
             return Optional.empty();
         }
 
-        User user = new User(normalisedEmail, passwordEncoder.encode(password));
+        User newUser = new User(normalizedEmail, passwordEncoder.encode(password));
+        User savedUser = userService.createUserAndReturn(newUser);
+        createDefaultBudgets(savedUser.getId());
+        return Optional.of(savedUser);
+    }
 
-        try {
-            userService.createUser(user);
+    private void createDefaultBudgets(Integer userId) {
+        LocalDateTime now = LocalDateTime.now();
 
-            User savedUser = userService.getUserByEmail(normalisedEmail)
-                    .orElse(null);
-
-            if (savedUser == null || savedUser.getId() == null) {
-                return Optional.empty();
-            }
-
-            List<String> defaultBudgetNames = List.of(
-                    "Groceries",
-                    "Rent",
-                    "Entertainment",
-                    "Utilities",
-                    "Transportation"
-            );
-
-            LocalDateTime now = LocalDateTime.now();
-            for (String budgetName : defaultBudgetNames) {
-                Budget budget = new Budget(savedUser.getId(), budgetName, BigDecimal.valueOf(100), now);
-                budgetService.createBudget(budget);
-            }
-
-            return Optional.of(savedUser);
-        } catch (DataIntegrityViolationException ex) {
-            return Optional.empty();
+        for (String budgetName : DEFAULT_BUDGET_NAMES) {
+            Budget budget = new Budget(userId, budgetName, DEFAULT_BUDGET_AMOUNT, now);
+            budgetService.createBudget(budget);
         }
     }
 

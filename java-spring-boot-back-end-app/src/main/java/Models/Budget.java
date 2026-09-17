@@ -18,10 +18,13 @@ public class Budget {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "userId", nullable = false)
+    @Column(name = "user_id", nullable = false)
     private Integer userId;
+    @Column(name = "category")
     private String category;
+    @Column(name = "amount")
     private BigDecimal amount;
+    @Column(name = "date")
     private LocalDateTime date;
 
     protected Budget() {

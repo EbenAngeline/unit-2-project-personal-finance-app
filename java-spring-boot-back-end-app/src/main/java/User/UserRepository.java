@@ -23,6 +23,10 @@ public interface UserRepository extends JpaRepository<User, Integer> {
         save(user);
     }
 
+    default User createUserAndReturn(User user) {
+        return saveAndFlush(user);
+    }
+
     default Optional<User> updateUser(Integer id, User userDetails) {
         Optional<User> existingUser = findById(id);
 
