@@ -24,9 +24,9 @@ public class BudgetController {
         return ResponseEntity.status(HttpStatus.CREATED).body(message);
     }
 
-    @GetMapping
-    public ResponseEntity<List<Budget>> getAllBudgets() {
-        List<Budget> budgets = budgetService.getAllBudgets();
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Budget>> getBudgetsByUserId(@PathVariable Integer userId) {
+        List<Budget> budgets = budgetService.getBudgetsByUserId(userId);
         return ResponseEntity.ok(budgets);
     }
 

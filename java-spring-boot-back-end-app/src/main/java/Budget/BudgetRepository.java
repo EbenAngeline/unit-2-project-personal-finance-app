@@ -10,8 +10,10 @@ import java.util.Optional;
 @Repository
 public interface BudgetRepository extends JpaRepository<Budget, Integer> {
 
-    default List<Budget> findAllBudgets() {
-        return findAll();
+    List<Budget> findByUserId(Integer userId);
+
+    default List<Budget> findBudgetsByUserId(Integer userId) {
+        return findByUserId(userId);
     }
 
     default void createBudget(Budget budget) {

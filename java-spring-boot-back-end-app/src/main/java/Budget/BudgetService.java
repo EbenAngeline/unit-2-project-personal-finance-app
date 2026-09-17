@@ -19,8 +19,8 @@ public class BudgetService {
         budgetRepository.createBudget(budget);
     }
 
-    public List<Budget> getAllBudgets() {
-        return budgetRepository.findAllBudgets();
+    public List<Budget> getBudgetsByUserId(Integer userId) {
+        return budgetRepository.findBudgetsByUserId(userId);
     }
 
     public Optional<Budget> updateBudget(Integer id, Budget budgetDetails) {
