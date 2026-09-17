@@ -187,11 +187,63 @@ const BudgetManagement = ({
   const navigate = useNavigate();
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
+  const [budgetItemIds, setBudgetItemIds] = useState({});
+  const [budgetTransactions, setBudgetTransactions] = useState(transactions || []);
   const userId = currentUser?.userId ?? currentUser?.id ?? currentUser?.user?.id ?? null;
 
   useEffect(() => {
     if (!userId) {
+      setBudgetTransactions([]);
       setBudgetLimits({});
+      setBudgetItemIds({});
+      return;
+    }
+
+    let isCancelled = false;
+
+    const getTransactionsForUser = async () => {
+      try {
+        const response = await fetch(`/api/transactions?userId=${userId}`);
+        if (!response.ok) {
+          throw new Error("Unable to load transactions.");
+        }
+
+        const transactionsFromDb = await response.json();
+        if (isCancelled) return;
+
+        setBudgetTransactions(
+          (transactionsFromDb || []).map((transaction) => ({
+            ...transaction,
+            date: transaction.date?.slice(0, 10) ?? "",
+            description: transaction.description ?? "N/A",
+            amount: Number(transaction.amount),
+          })),
+        );
+      } catch (error) {
+        console.error(error);
+        if (!isCancelled) {
+          setBudgetTransactions([]);
+        }
+      }
+    };
+
+    getTransactionsForUser();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [userId]);
+
+  useEffect(() => {
+    if (transactions && transactions.length > 0) {
+      setBudgetTransactions(transactions);
+    }
+  }, [transactions]);
+
+  useEffect(() => {
+    if (!userId) {
+      setBudgetLimits({});
+      setBudgetItemIds({});
       return;
     }
 
@@ -204,16 +256,28 @@ const BudgetManagement = ({
         if (isCancelled) return;
 
         const nextBudgetLimits = normalizeBudgetLimits(payload);
+        const nextBudgetItemIds = Array.isArray(payload)
+          ? payload.reduce((acc, item) => {
+              const categoryName = item?.category ?? item?.name ?? item?.categoryName;
+              if (categoryName && item?.id) {
+                acc[categoryName] = item.id;
+              }
+              return acc;
+            }, {})
+          : {};
+
         if (payload?.budgetPeriod || payload?.period) {
           const nextPeriod = payload.budgetPeriod || payload.period;
           setBudgetPeriod(nextPeriod);
         }
 
         setBudgetLimits(nextBudgetLimits);
+        setBudgetItemIds(nextBudgetItemIds);
       } catch (error) {
         console.error(error);
         if (!isCancelled) {
           setBudgetLimits({});
+          setBudgetItemIds({});
         }
       }
     };
@@ -226,7 +290,7 @@ const BudgetManagement = ({
   }, [userId, setBudgetLimits]);
 
   const budgetCategories = Object.entries(budgetLimits).map(([name, limit]) => {
-    const expenses = transactions.filter(
+    const expenses = budgetTransactions.filter(
       (transaction) =>
         transaction.category === name && transaction.amount < 0,
     );
@@ -262,26 +326,37 @@ const BudgetManagement = ({
       return;
     }
 
+    const categoryName = editingCategory.name || editingCategory;
+    const categoryId = editingCategory.id ?? budgetItemIds[categoryName] ?? null;
+
     try {
-      const response = await fetchBudgetApi(userId, {
+      const endpoint = categoryId
+        ? `/api/budgets/user/${userId}/budget/${categoryId}`
+        : `/api/budgets/user/${userId}`;
+
+      const response = await fetch(endpoint, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          category: editingCategory,
           amount: Number(nextLimit),
         }),
       });
 
       const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(payload?.message || "Unable to update budget limit.");
+      }
+
       const nextBudgetLimits = normalizeBudgetLimits(payload);
       setBudgetLimits(
         Object.keys(nextBudgetLimits).length > 0
           ? nextBudgetLimits
-          : { ...budgetLimits, [editingCategory]: Number(nextLimit) },
+          : { ...budgetLimits, [categoryName]: Number(nextLimit) },
       );
     } catch (error) {
       console.error(error);
-      setBudgetLimits({ ...budgetLimits, [editingCategory]: Number(nextLimit) });
+      setBudgetLimits({ ...budgetLimits, [categoryName]: Number(nextLimit) });
     } finally {
       setEditingCategory(null);
     }
@@ -345,7 +420,10 @@ const BudgetManagement = ({
               spent={cat.spent}
               remaining={cat.remaining}
               onSelect={handleSelectCategory}
-              onEdit={setEditingCategory}
+              onEdit={(categoryName) => {
+                const categoryId = budgetItemIds[categoryName];
+                setEditingCategory(categoryId ? { name: categoryName, id: categoryId } : categoryName);
+              }}
             />
           ))}
         </div>
@@ -364,8 +442,8 @@ const BudgetManagement = ({
       {editingCategory && (
         <Modal onClose={() => setEditingCategory(null)}>
           <BudgetCategoryForm
-            categoryName={editingCategory}
-            limit={budgetLimits[editingCategory]}
+            categoryName={editingCategory.name || editingCategory}
+            limit={budgetLimits[editingCategory.name || editingCategory] ?? 0}
             onSave={handleSaveCategoryLimit}
             onClose={() => setEditingCategory(null)}
           />
