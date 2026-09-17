@@ -52,11 +52,51 @@ function AddTransaction({
     };
 
     if (isEditing) {
-      const updated = transactions.map((transaction) => {  //map() goes through every transaction.
-        if (transaction.id !== editingTransaction.id) return transaction;
-        return { ...transaction, ...details };
-      });
-      setTransactions(updated);  //Updates the state.
+      if (!currentUser?.userId) {
+        setSubmitError("You must be logged in to update a transaction.");
+        return;
+      }
+
+      try {
+        setIsSubmitting(true);
+        setSubmitError("");
+
+        const response = await fetch(`/api/transactions/${editingTransaction.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...details,
+            userId: currentUser.userId,
+            date: `${date}T00:00:00`,
+          }),
+        });
+
+        const updatedTransaction = await response.json().catch(() => null);
+
+        if (!response.ok) {
+          throw new Error(updatedTransaction?.message || "Unable to update transaction.");
+        }
+
+        const normalizedTransaction = {
+          ...updatedTransaction,
+          date: updatedTransaction.date?.slice(0, 10) ?? date,
+          description: updatedTransaction.description ?? "N/A",
+          amount: Number(updatedTransaction.amount),
+        };
+
+        setTransactions(
+          transactions.map((transaction) =>
+            transaction.id === editingTransaction.id
+              ? normalizedTransaction
+              : transaction,
+          ),
+        );
+      } catch (error) {
+        setSubmitError(error.message || "Unable to update transaction.");
+        return;
+      } finally {
+        setIsSubmitting(false);
+      }
     } else {
       if (!currentUser?.userId) {
         setSubmitError("You must be logged in to add a transaction.");
