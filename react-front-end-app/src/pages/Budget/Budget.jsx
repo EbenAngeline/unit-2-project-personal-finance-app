@@ -97,40 +97,83 @@ const BudgetCategory = ({
 const normalizeBudgetLimits = (payload) => {
   if (!payload || typeof payload !== "object") return {};
 
-  if (Array.isArray(payload)) {
-    return payload.reduce((acc, item) => {
-      const name = item?.name ?? item?.category ?? item?.categoryName;
-      const limit = Number(item?.limit ?? item?.amount ?? item?.budget ?? 0);
+  const toEntries = (value) => {
+    if (!value || typeof value !== "object") return [];
 
-      if (name) {
-        acc[name] = Number.isFinite(limit) ? limit : 0;
+    if (Array.isArray(value)) {
+      return value.map((item) => {
+        const name = item?.name ?? item?.category ?? item?.categoryName ?? item?.label;
+        const amount = Number(item?.amount ?? item?.limit ?? item?.budget ?? item?.value ?? 0);
+        return [name, Number.isFinite(amount) ? amount : 0];
+      }).filter(([name]) => Boolean(name));
+    }
+
+    return Object.entries(value).map(([key, val]) => {
+      if (val && typeof val === "object") {
+        const name = val.name ?? val.category ?? val.categoryName ?? val.label ?? key;
+        const amount = Number(val.amount ?? val.limit ?? val.budget ?? val.value ?? 0);
+        return [name, Number.isFinite(amount) ? amount : 0];
       }
 
-      return acc;
-    }, {});
-  }
+      const amount = Number(val ?? 0);
+      return [key, Number.isFinite(amount) ? amount : 0];
+    });
+  };
 
-  const directBudget = payload.budgetLimits ?? payload.budget ?? payload.data ?? payload;
+  const candidateCollections = [
+    payload.budget,
+    payload.budgetLimits,
+    payload.budgets,
+    payload.categories,
+    payload.data,
+    payload.items,
+    payload,
+  ];
 
-  if (directBudget && typeof directBudget === "object") {
-    return Object.entries(directBudget).reduce((acc, [key, value]) => {
-      if (typeof value === "object" && value !== null) {
-        const name = value.name ?? value.category ?? value.categoryName ?? key;
-        const limit = Number(value.limit ?? value.amount ?? value.budget ?? value.value ?? 0);
+  for (const collection of candidateCollections) {
+    if (!collection || typeof collection !== "object") continue;
 
-        if (name) {
-          acc[name] = Number.isFinite(limit) ? limit : 0;
-        }
-      } else if (key) {
-        const limit = Number(value ?? 0);
-        acc[key] = Number.isFinite(limit) ? limit : 0;
-      }
+    const entries = toEntries(collection);
+    const filteredEntries = entries.filter(([name, value]) => Boolean(name) && Number.isFinite(Number(value)));
 
-      return acc;
-    }, {});
+    if (filteredEntries.length > 0) {
+      return filteredEntries.reduce((acc, [name, value]) => {
+        acc[name] = Number(value);
+        return acc;
+      }, {});
+    }
   }
 
   return {};
+};
+
+const getBudgetEndpointCandidates = (userId) => [
+  `/api/budgets/user/${userId}`,
+];
+
+const fetchBudgetApi = async (userId, init) => {
+  const candidates = getBudgetEndpointCandidates(userId);
+  let lastError = null;
+
+  for (const url of candidates) {
+    try {
+      const response = await fetch(url, init);
+      if (response.ok) {
+        return response;
+      }
+
+      if (response.status !== 404 && response.status !== 405) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload?.message || "Unable to reach budget endpoint.");
+      }
+
+      lastError = new Error(`Budget endpoint unavailable at ${url}`);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError || new Error("Unable to load budget.");
 };
 
 const BudgetManagement = ({
@@ -144,9 +187,10 @@ const BudgetManagement = ({
   const navigate = useNavigate();
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
+  const userId = currentUser?.userId ?? currentUser?.id ?? currentUser?.user?.id ?? null;
 
   useEffect(() => {
-    if (!currentUser?.userId) {
+    if (!userId) {
       setBudgetLimits({});
       return;
     }
@@ -155,16 +199,16 @@ const BudgetManagement = ({
 
     const getBudget = async () => {
       try {
-        const response = await fetch(`/api/budget?userId=${currentUser.userId}`);
-
-        if (!response.ok) {
-          throw new Error("Unable to load budget.");
-        }
-
+        const response = await fetchBudgetApi(userId);
         const payload = await response.json().catch(() => ({}));
         if (isCancelled) return;
 
         const nextBudgetLimits = normalizeBudgetLimits(payload);
+        if (payload?.budgetPeriod || payload?.period) {
+          const nextPeriod = payload.budgetPeriod || payload.period;
+          setBudgetPeriod(nextPeriod);
+        }
+
         setBudgetLimits(nextBudgetLimits);
       } catch (error) {
         console.error(error);
@@ -179,7 +223,7 @@ const BudgetManagement = ({
     return () => {
       isCancelled = true;
     };
-  }, [currentUser?.userId, setBudgetLimits]);
+  }, [userId, setBudgetLimits]);
 
   const budgetCategories = Object.entries(budgetLimits).map(([name, limit]) => {
     const expenses = transactions.filter(
@@ -213,13 +257,13 @@ const BudgetManagement = ({
   };
 
   const handleSaveCategoryLimit = async (nextLimit) => {
-    if (!currentUser?.userId || !editingCategory) {
+    if (!userId || !editingCategory) {
       setEditingCategory(null);
       return;
     }
 
     try {
-      const response = await fetch(`/api/budget?userId=${currentUser.userId}`, {
+      const response = await fetchBudgetApi(userId, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -229,11 +273,6 @@ const BudgetManagement = ({
       });
 
       const payload = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        throw new Error(payload?.message || "Unable to update budget limit.");
-      }
-
       const nextBudgetLimits = normalizeBudgetLimits(payload);
       setBudgetLimits(
         Object.keys(nextBudgetLimits).length > 0

@@ -18,6 +18,7 @@ function AddTransaction({
   editingTransaction = null,   //If adding a new one: If editing an existing transaction, this contains its data.
 }) {
   const isEditing = Boolean(editingTransaction);
+  const userId = currentUser?.userId ?? currentUser?.id ?? currentUser?.user?.id ?? null;
   const [transactionType, setTransactionType] = useState(
     editingTransaction
       ? editingTransaction.amount < 0
@@ -52,7 +53,7 @@ function AddTransaction({
     };
 
     if (isEditing) {
-      if (!currentUser?.userId) {
+      if (!userId) {
         setSubmitError("You must be logged in to update a transaction.");
         return;
       }
@@ -66,7 +67,7 @@ function AddTransaction({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             ...details,
-            userId: currentUser.userId,
+            userId: userId,
             date: `${date}T00:00:00`,
           }),
         });
@@ -98,7 +99,7 @@ function AddTransaction({
         setIsSubmitting(false);
       }
     } else {
-      if (!currentUser?.userId) {
+      if (!userId) {
         setSubmitError("You must be logged in to add a transaction.");
         return;
       }
@@ -112,7 +113,7 @@ function AddTransaction({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             ...details,
-            userId: currentUser.userId,
+            userId: userId,
             date: `${date}T00:00:00`,
           }),
         });

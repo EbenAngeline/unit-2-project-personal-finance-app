@@ -25,9 +25,10 @@ const activityColumns = [
 
 function Dashboard({ currentUser }) {
   const [transactions, setTransactions] = useState([]);
+  const userId = currentUser?.userId ?? currentUser?.id ?? currentUser?.user?.id ?? null;
 
   useEffect(() => {
-    if (!currentUser?.userId) {
+    if (!userId) {
       setTransactions([]);
       return;
     }
@@ -37,7 +38,7 @@ function Dashboard({ currentUser }) {
     const getTransactionsForUser = async () => {
       try {
         const response = await fetch(
-          `/api/transactions?userId=${currentUser.userId}`,
+          `/api/transactions?userId=${userId}`,
         );
 
         if (!response.ok) {
@@ -68,7 +69,7 @@ function Dashboard({ currentUser }) {
     return () => {
       isCancelled = true;
     };
-  }, [currentUser?.userId]);
+  }, [userId]);
 
   const totalIncome = transactions    //keeps only income
     .filter((item) => item.amount >= 0)

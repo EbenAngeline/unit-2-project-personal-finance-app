@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
 import "./App.css";
 import Header from "./components/Header/Header";
 import Footer from "./components/Footer/Footer";
@@ -17,23 +17,63 @@ function App() {
   const [transactions, setTransactions] = useState([]);
   const [budgetLimits, setBudgetLimits] = useState({});
   const [budgetPeriod, setBudgetPeriod] = useState("Monthly");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
+
+  const getUserId = (user) => user?.userId ?? user?.id ?? user?.user?.id ?? null;
+
+  const readStoredUser = () => {
+    try {
+      const savedUser = sessionStorage.getItem("currentUser");
+      if (!savedUser) return null;
+      const parsedUser = JSON.parse(savedUser);
+      const normalizedUser = parsedUser && getUserId(parsedUser) ? { ...parsedUser, userId: getUserId(parsedUser) } : null;
+      return normalizedUser;
+    } catch {
+      return null;
+    }
+  };
+
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    const saved = sessionStorage.getItem("isLoggedIn");
+    return saved ? JSON.parse(saved) : false;
+  });
+  const [currentUser, setCurrentUser] = useState(readStoredUser);
+
+  useEffect(() => {
+    sessionStorage.setItem("isLoggedIn", JSON.stringify(Boolean(isLoggedIn && currentUser?.userId)));
+    if (currentUser?.userId) {
+      sessionStorage.setItem("currentUser", JSON.stringify(currentUser));
+    } else {
+      sessionStorage.removeItem("currentUser");
+    }
+  }, [isLoggedIn, currentUser]);
+
+  const normalizeUser = (user) => {
+    const userId = getUserId(user);
+    return user && userId ? { ...user, userId } : null;
+  };
 
   const handleLogin = (user) => {
-    const nextUser = user ?? { email: "user@example.com" };
+    const normalizedUser = normalizeUser(user);
+
+    setTransactions([]);
     setBudgetLimits({});
     setBudgetPeriod("Monthly");
-    setCurrentUser(nextUser);
-    setIsLoggedIn(true);
+    setCurrentUser(normalizedUser);
+    setIsLoggedIn(Boolean(normalizedUser?.userId));
   };
 
   const handleLogout = () => {
+    setTransactions([]);
     setBudgetLimits({});
     setBudgetPeriod("Monthly");
     setCurrentUser(null);
     setIsLoggedIn(false);
+    sessionStorage.removeItem("currentUser");
+    sessionStorage.removeItem("isLoggedIn");
   };
+
+  const requireAuth = (element) =>
+    isLoggedIn && currentUser?.userId ? element : <Navigate to="/login" replace />;
 
   return (
     <div className="app-shell">
@@ -50,11 +90,11 @@ function App() {
             <Route path="/signup" element={<SignUpPage />} />
             <Route
               path="/dashboard"
-              element={<Dashboard currentUser={currentUser} />}
+              element={requireAuth(<Dashboard currentUser={currentUser} />)}
             />
             <Route
               path="/budget"
-              element={
+              element={requireAuth(
                 <Budget
                   transactions={transactions}
                   budgetLimits={budgetLimits}
@@ -62,18 +102,18 @@ function App() {
                   budgetPeriod={budgetPeriod}
                   setBudgetPeriod={setBudgetPeriod}
                   currentUser={currentUser}
-                />
-              }
+                />,
+              )}
             />
             <Route
               path="/transactions"
-              element={
+              element={requireAuth(
                 <Transactions
-                  transactions={transactions}  //Current list.
-                  setTransactions={setTransactions}  //Saves the updated data to sessionStorage.
+                  transactions={transactions}
+                  setTransactions={setTransactions}
                   currentUser={currentUser}
-                />
-              }
+                />,
+              )}
             />
           </Routes>
         </main>

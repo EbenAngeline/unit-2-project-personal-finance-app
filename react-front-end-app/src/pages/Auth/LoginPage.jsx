@@ -46,9 +46,15 @@ function LoginPage({ onLogin }) {
         throw new Error(data.message || "Invalid email or password.");
       }
 
+      const userId = data.userId ?? data.id ?? data.user?.id ?? data.user?.userId ?? null;
+
+      if (!userId) {
+        throw new Error("Login response did not include a valid user ID.");
+      }
+
       const user = {
         email,
-        userId: data.userId ?? null,
+        userId,
       };
 
       if (onLogin) onLogin(user);

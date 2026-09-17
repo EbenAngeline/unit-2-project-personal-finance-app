@@ -49,13 +49,14 @@ function Transactions({ transactions, setTransactions, currentUser }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [deletingTransaction, setDeletingTransaction] = useState(null);
+  const userId = currentUser?.userId ?? currentUser?.id ?? currentUser?.user?.id ?? null;
   const [selectedCategory, setSelectedCategory] = useState(
     () => searchParams.get("category") || "All categories", //Lets Budget deep-link straight to a filtered view.
   );
   const [sortBy, setSortBy] = useState("Date");
 
   useEffect(() => {
-    if (!currentUser?.userId) {
+    if (!userId) {
       setTransactions([]);
       return;
     }
@@ -65,7 +66,7 @@ function Transactions({ transactions, setTransactions, currentUser }) {
     const getTransactionsForUser = async () => {
       try {
         const response = await fetch(
-          `/api/transactions?userId=${currentUser.userId}`,
+          `/api/transactions?userId=${userId}`,
         );
 
         if (!response.ok) {
@@ -96,7 +97,7 @@ function Transactions({ transactions, setTransactions, currentUser }) {
     return () => {
       isCancelled = true;
     };
-  }, [currentUser?.userId, setTransactions]);
+  }, [userId, setTransactions]);
 
   const categoryFromLink = searchParams.get("category");
   const categories = [
