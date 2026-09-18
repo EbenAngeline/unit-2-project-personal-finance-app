@@ -1,0 +1,174 @@
+.page-header {
+  margin-bottom: 5rem;
+}
+
+.budget-summary,
+.budget-section {
+  margin-bottom: 1rem;
+}
+.budget-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+.summary-item {
+  padding: 0.4rem 0;
+}
+.summary-item .value {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+.summary-overall {
+  grid-column: 1 / -1;
+}
+.progress-track {
+  width: 100%;
+  height: 8px;
+  background: var(--divider);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  margin-top: 0.4rem;
+}
+.progress-bar {
+  height: 100%;
+  border-radius: var(--radius-pill);
+}
+.progress-bar--normal {
+  background: var(--success);
+}
+.progress-bar--warning {
+  background: var(--warning);
+}
+.progress-bar--danger {
+  background: var(--danger);
+}
+.summary-edit {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+}
+.edit-settings-btn {
+  padding: 0.5rem 0.8rem;
+  border-radius: var(--radius-pill);
+  background: var(--divider);
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.section-title-row {
+  margin-bottom: 0.75rem;
+}
+.section-title-row h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.categories {
+  display: grid;
+  gap: 0.75rem;
+}
+.budget-category {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.9rem;
+  cursor: pointer;
+}
+.budget-category:hover {
+  border-color: #2563eb;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+}
+.budget-category:focus-visible {
+  outline: 2px solid var(--accent, #4f46e5);
+  outline-offset: 2px;
+}
+.category-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.category-title h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+.edit-category-btn {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1;
+  padding: 0.2rem;
+}
+.edit-category-btn:hover {
+  color: var(--ink);
+}
+.category-detail {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0.7rem 0;
+}
+.detail .value {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.category-status {
+  margin-bottom: 0.5rem;
+}
+.status-over {
+  color: var(--danger);
+  font-weight: 600;
+}
+.status-remaining {
+  font-weight: 600;
+}
+.status-remaining--normal {
+  color: var(--success);
+}
+.status-remaining--warning {
+  color: var(--warning);
+}
+/* Breakpoint 1: tablet - collapse the 2/3-column summaries to one column */
+@media (max-width: 768px) {
+  .budget-summary,
+  .category-detail {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Breakpoint 2: phone - tighten category card spacing */
+@media (max-width: 480px) {
+  .budget-category {
+    padding: 0.65rem;
+  }
+  .category-detail {
+    gap: 0.5rem;
+  }
+}
+
+/* Edit-settings / edit-category form fields (mirrors AddTransaction's field styling) */
+.budget-settings h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.3rem;
+}
+.budget-settings p {
+  margin: 0 0 1rem;
+  color: var(--muted);
+}
+.budget-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+/* Cascade note: kept local like AddTransaction's copy — see common.css for
+   the shared .field-group/.field-label/.form-action/.cancel-button/.save-button
+   rules and why .input-with-icon input isn't centralized. */
+.input-with-icon input {
+  border: none;
+  flex: 1;
+  padding: 0.6rem 0.7rem;
+  font-size: 0.95rem;
+}

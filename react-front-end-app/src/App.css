@@ -1,0 +1,33 @@
+.app-shell {
+  display: flex;
+  height: 100vh;
+}
+
+.app-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.app-main {
+  flex: 1;
+  padding: 1.5rem;
+  overflow: auto;
+  min-height: 0;
+}
+
+/* Breakpoint 1: tablet - sidebar nav becomes a top bar (see Header.css) */
+@media (max-width: 768px) {
+  .app-shell {
+    flex-direction: column;
+  }
+}
+
+/* Breakpoint 2: phone - tighten padding further */
+@media (max-width: 480px) {
+  .app-main {
+    padding: 0.75rem;
+  }
+}
