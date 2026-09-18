@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import "./Dashboard.css";
 import Table from "../../components/Table/Table";
+import DashboardHero from "./DashboardHero";
+import MetricCard from "./MetricCard";
+import RecentActivityHeader from "./RecentActivityHeader";
 
 function renderPill(value) { //shared by the category and type columns below
   return <span className={`type-pill ${value.toLowerCase()}`}>{value}</span>;
@@ -84,39 +86,26 @@ function Dashboard({ currentUser }) {
 
   return (
     <div className="dashboard-page">
-      <section className="dashboard-hero">
-        <div>
-          <h1>Dashboard</h1>
-          <h3 className="hero-text">
-            A simple view of your balance and recent transactions.
-          </h3>
-        </div>
-      </section>
+      <DashboardHero />
 
       <section className="dashboard-grid">
-        <article className="box">
-          <p className="box-label">Balance</p>
-          <h2 className={currentBalance >= 0 ? "positive" : "negative"}>
-            ${currentBalance.toLocaleString()}
-          </h2>
-        </article>
-        <article className="box">
-          <p className="box-label">Expenses</p>
-          <h2>${totalExpenses.toLocaleString()}</h2>
-        </article>
-        <article className="box">
-          <p className="box-label">Income</p>
-          <h2>${totalIncome.toLocaleString()}</h2>
-        </article>
+        <MetricCard
+          label="Balance"
+          value={`$${currentBalance.toLocaleString()}`}
+          tone={currentBalance >= 0 ? "positive" : "negative"}
+        />
+        <MetricCard
+          label="Expenses"
+          value={`$${totalExpenses.toLocaleString()}`}
+        />
+        <MetricCard
+          label="Income"
+          value={`$${totalIncome.toLocaleString()}`}
+        />
       </section>
 
       <section className="transaction-card">
-        <div className="transaction-card-header">
-          <h2>Recent activity</h2>
-          <Link className="view-all-link" to="/transactions">
-            View all
-          </Link>
-        </div>
+        <RecentActivityHeader />
 
         <Table
           className="activity-table"
