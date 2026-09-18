@@ -5,8 +5,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,39 +25,65 @@ public class TransactionsController {
         this.transactionsService = transactionsService;
     }
 
+    /**
+     * Create a transaction
+     *
+     * POST /api/transactions
+     */
     @PostMapping
-    public ResponseEntity<Transaction> createTransaction(@RequestBody Transaction transaction) {
-        Transaction createdTransaction = transactionsService.createTransaction(transaction);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdTransaction);
+    public ResponseEntity<Transaction> createTransaction(
+            @RequestBody Transaction transaction) {
+
+        Transaction createdTransaction =
+                transactionsService.createTransaction(transaction);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(createdTransaction);
     }
 
+    /**
+     * Get all transactions for a user
+     *
+     * GET /api/transactions?userId=1
+     */
     @GetMapping
-    public ResponseEntity<List<Transaction>> getAllTransactions(@RequestParam Integer userId) {
-        List<Transaction> transactions = transactionsService.getAllTransactions(userId);
+    public ResponseEntity<List<Transaction>> getAllTransactions(
+            @RequestParam Integer userId) {
+
+        List<Transaction> transactions =
+                transactionsService.getAllTransactions(userId);
+
         return ResponseEntity.ok(transactions);
     }
 
+    /**
+     * Update a transaction
+     *
+     * PATCH /api/transactions/{id}
+     */
     @PatchMapping("/{id}")
-    public ResponseEntity<String> updateTransaction(
+    public ResponseEntity<Transaction> updateTransaction(
             @PathVariable Integer id,
             @RequestBody Transaction transactionDetails) {
-        boolean updated = transactionsService.updateTransaction(id, transactionDetails).isPresent();
 
-        if (!updated) {
-            return ResponseEntity.notFound().build();
-        }
+        Transaction updatedTransaction =
+                transactionsService.updateTransaction(id, transactionDetails);
 
-        return ResponseEntity.ok("Transaction updated successfully.");
+        return ResponseEntity.ok(updatedTransaction);
     }
 
+    /**
+     * Delete a transaction
+     *
+     * DELETE /api/transactions/{id}
+     */
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteTransaction(@PathVariable Integer id) {
-        boolean deleted = transactionsService.deleteTransaction(id);
+    public ResponseEntity<Void> deleteTransaction(
+            @PathVariable Integer id) {
 
-        if (!deleted) {
-            return ResponseEntity.notFound().build();
-        }
+        transactionsService.deleteTransaction(id);
 
-        return ResponseEntity.ok("Transaction deleted successfully.");
+        return ResponseEntity.noContent().build();
     }
 }
