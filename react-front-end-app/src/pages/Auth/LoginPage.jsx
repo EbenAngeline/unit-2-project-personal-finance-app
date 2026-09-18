@@ -70,6 +70,8 @@ function LoginPage({ onLogin }) {
   const handleSignUpSubmit = async (event) => {
     event.preventDefault();
 
+    if (isSubmitting) return;
+
     const form = event.currentTarget;
     const email = form.email.value.trim();
     const password = form.password.value;
