@@ -628,6 +628,6 @@ Building this project gave me experience developing a full-stack application and
 
 ## 🧑‍💻 Author
 
-_Your Name_ — [@your-github](https://github.com/your-username) · [LinkedIn](https://www.linkedin.com/in/your-profile)
+Eben Angeline — [@your-github](https://github.com/EbenAngeline)
 
 Built as the Unit 2 full-stack project for [LaunchCode](https://www.launchcode.org).
