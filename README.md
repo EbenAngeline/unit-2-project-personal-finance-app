@@ -132,7 +132,6 @@ This project was built to satisfy the **LaunchCode Unit 2** full-stack requireme
 <details open>
     <summary>Home Page</summary>
     <img src="./images/home.png" alt="Screenshot of Home Page view" height="500px" />
-    >
 </details>
 
 <details>
@@ -154,8 +153,7 @@ This project was built to satisfy the **LaunchCode Unit 2** full-stack requireme
 
 <details>
     <summary>Budget & Limit Editing</summary>
-    <em>Coming soon!</em>
-    <img src="preview/budget.png" alt="Screenshot of Budget view" width="700px" />
+    <img src="./images/budget.png" alt="Screenshot of Budget view" width="700px" />
 </details>
 
 ---
